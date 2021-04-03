@@ -20,13 +20,14 @@ totiente = (p-1)*(q-1)
 # d * e = 1 mod totiente
 #for d in range(e*2,totiente,totiente%e):
 ciclos = 0
-for d in range(0,totiente,e):
+for d in range(math.floor(math.sqrt(p*q)),totiente,1):
 	ciclos +=1
 #	print (d)
 	if d*e % totiente == 1:
 #		print (f'd: {d}')
 		break
-#print(f'ciclos: {ciclos}')
+print(f'ciclos: {ciclos}')
 print(f'c: {c} d:{d}')
-msg = c**d % n
+#msg = c**d % n
+msg = pow(c, d, n)
 print (msg)
