@@ -60,11 +60,13 @@ int powmod5 (int b, int e, int modulo){
 	std::cerr<<"init: "<<b<<" ^ "<<e<<" % "<<modulo<<'\n';
 	int acum = 1;
 	int rest = e%5;
-	int save = powmod2(b,5,modulo);
-	for (int i = 5; i <= e; i+= 5){
-		std::cerr<<"acum-:"<<acum;
-		acum = acum * save % modulo;
-		std::cerr<<"base: "<<b<<" e: "<<e<<" i: "<<i<<" acum: "<<acum<<'\n';
+	if (e >= 5){
+		int save = powmod2(b,5,modulo);
+		for (int i = 5; i <= e; i+= 5){
+			std::cerr<<"acum-:"<<acum;
+			acum = acum * save % modulo;
+			std::cerr<<"base: "<<b<<" e: "<<e<<" i: "<<i<<" acum: "<<acum<<'\n';
+	}
 	}
 	std::cerr<<"acum+:"<<acum<<' ';
 	acum = acum * powmod2(b,rest,modulo) % modulo;
@@ -129,8 +131,8 @@ int main(){
 //	cout << std::fmod (std::pow(c,d), n) <<endl;
 	
 	cout<<powmod (c,d,n,phisao,size)<<endl;
-	//cout<<powmod2(c,d,n)<<endl;
-//	cout<<powmod5(c,d,n)<<endl;
+	cout<<powmod2(c,d,n)<<endl;
+	cout<<powmod5(c,d,n)<<endl;
 //	for (int i = 0; i< size; i++)
 //		cout << phisao[i] << ' ';
 	return 0;
