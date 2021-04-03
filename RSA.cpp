@@ -92,7 +92,7 @@ int powmod(int b, int e, int modulo, int * phisao,int size){
 		if (nexp % phisao[i] == 0){
 			nexp = nexp/phisao[i];
 			expoentes[iexp++] = phisao[i];
-			i=0;
+			i--;
 		}
 	}
 	int acum = b;
@@ -131,8 +131,8 @@ int main(){
 //	cout << std::fmod (std::pow(c,d), n) <<endl;
 	
 	cout<<powmod (c,d,n,phisao,size)<<endl;
-	cout<<powmod2(c,d,n)<<endl;
-	cout<<powmod5(c,d,n)<<endl;
+//	cout<<powmod2(c,d,n)<<endl;
+//	cout<<powmod5(c,d,n)<<endl;
 //	for (int i = 0; i< size; i++)
 //		cout << phisao[i] << ' ';
 	return 0;
