@@ -132,7 +132,7 @@ int main(){
 	
 	cout<<powmod (c,d,n,phisao,size)<<endl;
 //	cout<<powmod2(c,d,n)<<endl;
-//	cout<<powmod5(c,d,n)<<endl;
+	cout<<powmod5(c,d,n)<<endl;
 //	for (int i = 0; i< size; i++)
 //		cout << phisao[i] << ' ';
 	return 0;
