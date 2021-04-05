@@ -11,7 +11,9 @@ test:
 	exec ./rsa.exec < input
 testar:
 	python testador.py > ent
-	python RSA.py < ent
-	./rsa.exec < ent 2> rsa.exec.log 
+	echo py: > log
+	python RSA.py < ent 2>> log
+	echo cpp: >> log
+	./rsa.exec < ent 2>> log 
 clean:
 	rm -rf *.o rsa.exec

@@ -35,7 +35,7 @@ while (p == q):
 t = (p-1)*(q-1)
 n = p*q
 msg = randint(n) # mensagem deve ser menor que N, ou seja, p*q
-print(msg,file=sys.stderr)
+print(f"mensagem: {msg} p: {p} q:{q}",file=sys.stderr)
 #criptografar:
 e = randint(t)
 while(not primdc(t,e)):

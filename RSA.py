@@ -1,4 +1,5 @@
 import math
+import sys
 
 from math import floor, sqrt
 def crivo (n):
@@ -34,7 +35,7 @@ for x in primos:
 		break
 
 #print(f'ciclos {ciclos}')
-#print (f'p {p} q {q}')
+print (f'p {p} q {q}',file=sys.stderr)
 totiente = (p-1)*(q-1)
 #print(f'totiente: {totiente}')
 #inverso
@@ -48,7 +49,7 @@ for d in range(math.floor(math.sqrt(p*q)),totiente,1):
 #		print (f'd: {d}')
 		break
 #print(f'ciclos: {ciclos}')
-#print(f'c: {c} d:{d}')
+print(f'd:{d}',file=sys.stderr)
 #msg = c**d % n
 msg = pow(c, d, n)
 print (msg)
