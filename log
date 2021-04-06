@@ -1,5 +1,21 @@
-e: 65663 totiente: 187612992
-D: 109188287 ciclos: 38215
-d: 109188287
-fatoração: 49477 e 3793
-ciclos: 21890104
+py:
+p 2243 q 463
+d:691183
+cpp:
+D: 691183 ciclos: 107185
+d: 691183
+fatoração: 2243 e 463
+exp: 2 acum: 818945
+
+exp: 3 acum: 383815
+
+exp: 3 acum: 671011
+
+exp: 19 acum: 30361
+
+exp: 43 acum: 590448
+
+exp: 47 acum: 59989
+
+um: 662901 * 273189 % 1038509 = 662901
+ciclos: 137299
