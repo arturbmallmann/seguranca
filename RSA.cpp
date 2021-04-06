@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 
+int ciclos;
 //#define ERR
 void crivo (int n,int *phisao) {
     phisao[0]=2;
@@ -33,6 +34,7 @@ void fatorar(int n, long long int * p, long long int * q,int * phisao, int size)
 		if (n % *q == 0){
 			*p = n / *q;
 		//	*q = q;
+			ciclos += i;
 			break;
 		}
 	}
@@ -49,18 +51,20 @@ void fatorar2(int n, long long int * p, long long int * q,int * phisao, int size
 		}
 	}
 }
-int gera_chave_d (long long int e, long long int totiente){
-	int m = floor(totiente / e);
-	int d = m;
-	for (; d < totiente; d+= m)
-		if (d*e % totiente == 1)
-			return d;
-	for (; d< totiente; d+=1)
-		if (d*e % totiente == 1)
-			return d;
-	for (d=0; d< totiente; d++)
-		if (d*e % totiente == 1)
-			return d;
+int gera_chave_d (long long int e, long long int totiente, int n){
+	int m = floor(totiente/e);
+    cerr<<"e: "<<e<<" totiente: "<<totiente<<endl;
+
+		for(int k=0;true; k++){
+			int d = (k * totiente +1 ) / e ;
+			if (d*e % totiente ==1){
+				cerr <<"D: "<<d<<" ciclos: "<<k<<endl;
+				ciclos += k;
+				return d;
+			}
+//			cout<<"D: "<<d<<endl;
+		}
+	
 	return -1;
 }
 
@@ -71,6 +75,7 @@ int powmod2 (long long int b, long long int e,long long int modulo){
  	for (int i=1; i < e ; i++){
         acum = acum % modulo * b % modulo;
  	}
+	ciclos += e;
 //	std::cerr<<"pw2: "<<b<<" ^ "<<e<<" % "<<modulo<<" =  "<<acum<<'\n';
  	return acum;
 }
@@ -87,6 +92,7 @@ int powmod5 (long long int b, long long int e, long long int modulo){
 //			std::cerr<<"acum-:"<<acum;
 			acum = acum % modulo * save % modulo;
 //			std::cerr<<"base: "<<b<<" e: "<<e<<" i: "<<i<<" acum: "<<acum<<'\n';
+			ciclos ++;
 	}
 	}
 //	std::cerr<<"acum+:"<<acum<<' ';
@@ -109,10 +115,14 @@ int powmod(long long int b, long long int e, long long int modulo, int * phisao,
 		um  = 1; // + uma multiplicacao
 	}
 	else nexp = e;
+	cerr<<"size "<<size<<endl;
 	for (int i = 0; phisao[i] <= nexp ; i++){
-//		if (nexp > 0xfffff)
+		ciclos++;
+		if (i >= size)
+			break;
 //			expoentes[iexp++]
 //			break;
+		//cerr<<"i: "<<i<<endl;
 		if (nexp % phisao[i] == 0){
 //			cerr<<"aqui?\n";
 			nexp = nexp/phisao[i];
@@ -131,8 +141,9 @@ int powmod(long long int b, long long int e, long long int modulo, int * phisao,
             std::cerr<<"exp: "<<expoentes[i]<<" acum: "<<acum<<"\n\n";
         #endif
 	}
+	ciclos += iexp;
 	//acum = powmod2(acum, nexp, modulo);
-//	acum = powmod5(acum, nexp, modulo);
+	acum = powmod5(acum, nexp, modulo);
 	if (um){
 		acum = acum % modulo * b % modulo;
         #ifdef ERR
@@ -147,35 +158,44 @@ int powmod(long long int b, long long int e, long long int modulo, int * phisao,
 using namespace std;
 int main(){
 //	int size = sqrt(pow(10,9));
-	int size = 10000;
+//	int size = 10000;
 //	cout<<"size: "<<size<<endl;
-	int * phisao = (int *) malloc(sizeof(int) * size);
-	crivo(size,phisao);
 	int n, e;
 	int c;
 	scanf("%d %d %d",&n,&e, &c);
+	int size = sqrt(n);
+
+	int * phisao = (int *) malloc(sizeof(int) * size);
+	crivo(size,phisao);
+	ciclos = size;
 	long long int p, q;
 	fatorar (n, &p, &q, phisao, size);
 	long long int totiente = (p-1)*(q-1);
-	long long int d = gera_chave_d(e,totiente);
+	long long int d = gera_chave_d(e,totiente,n);
 	cerr<<"d: "<<d<<endl;
-#ifdef ERR
 	cerr<<"fatoração: "<<p<<" e "<<q<<endl;
+#ifdef ERR
 	long long int a,b;
+	cerr<<"totiente:\n";
 	fatorar2((int)totiente,&a,&b,phisao,size);
-//	fatorar2((int)d, &a,&b,phisao,size);
-//	fatorar2((int)d-1, &a,&b,phisao,size);
-//	fatorar2((int)d+1, &a,&b,phisao,size);
+	cerr<<"d:\n";
+	fatorar2((int)d, &a,&b,phisao,size);
+	cerr<<"d-1:\n";
+	fatorar2((int)d-1, &a,&b,phisao,size);
+	cerr<<"d+1:\n";
+	fatorar2((int)d+1, &a,&b,phisao,size);
+	cerr<<"e:\n";
 	fatorar2(e,&a,&b,phisao,size);
 //	fatorar2(e-1,&a,&b,phisao,size);
 //	fatorar2(e+1,&a,&b,phisao,size);
 //	cout << std::fmod (std::pow(c,d), n) <<endl;
 #endif
     
-//	cout<<powmod (c,d,n,phisao,size)<<endl;
 //	cout<<powmod2(c,d,n)<<endl;
 	cout<<powmod5(c,d,n)<<endl;
-    cout<<powmod (c,d,n,phisao,size)<<endl;
+//	cout<<powmod (c,d,n,phisao,size)<<endl;
+	cerr<<"ciclos: "<<ciclos<<endl;
+//    cout<<powmod (c,d,n,phisao,size)<<endl;
 //	for (int i = 0; i< size; i++)
 //		cout << phisao[i] << ' ';
 	return 0;

@@ -37,7 +37,7 @@ n = p*q
 msg = randint(n) # mensagem deve ser menor que N, ou seja, p*q
 print(f"mensagem: {msg} p: {p} q:{q}",file=sys.stderr)
 #criptografar:
-e = randint(t)
+e = randint(t) # e deve ser menor que totiente e relativamente primo
 while(not primdc(t,e)):
 	e = randint(t)
 
