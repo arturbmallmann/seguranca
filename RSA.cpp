@@ -30,16 +30,16 @@ inline void crivo (int n,int *phisao) {
 }
 using namespace std;
 void fatorar(int n, long long int * p, long long int * q,int * phisao, int size){
-//	for (*q=3; *q < ceil(sqrt(n));*q = *q + 1){
-	for (int i=0; i<size;i++){
-		*q = phisao[i];
+	for (*q=3; *q < ceil(sqrt(n));*q = *q + 1){
+//	for (int i=0; i<size;i++){
+//		*q = phisao[i];
 //		cout<<"q "<<*q<<endl;
 		if (n % *q == 0){
 			*p = n / *q;
 		//	*q = q;
-			ciclos += i;
 			break;
 		}
+		ciclos ++;
 	}
 }
 // using namespace std;
@@ -54,10 +54,10 @@ void fatorar(int n, long long int * p, long long int * q,int * phisao, int size)
 // 		}
 // 	}
 // }
-int gera_chave_d (long long int e, long long int totiente, int n){
+int gera_chave_d (long long int e, long long int totiente, int n,int inc){
 //     cerr<<"e: "<<e<<" totiente: "<<totiente<<endl;
 
-    for(int k=0;true; k++){
+    for(int k=0;true; k+=inc){
         int d = (k * totiente +1 ) / e ;
         if (d*e % totiente ==1){
 #ifdef ERR
@@ -106,15 +106,15 @@ inline int powmod5 (long long int b, long long int e, long long int modulo){
 //	std::cerr<<"end:"<<acum<<"\n\n";
 	return acum;
 }
-inline int powmod200 (long long int b, long long int e, long long int modulo){
+inline int powmod20 (long long int b, long long int e, long long int modulo){
 //	if(e == 0)
 //		return 1;
 //	std::cerr<<"init: "<<b<<" ^ "<<e<<" % "<<modulo<<'\n';
 	long long int acum = 1;
-	long long int rest = e%200;
-	if (e >= 200){
-		long long int save = powmod5(b,200,modulo);
-		for (long long int i = 200; i <= e; i+= 200){
+	long long int rest = e%20;
+	if (e >= 20){
+		long long int save = powmod5(b,20,modulo);
+		for (long long int i = 20; i <= e; i+= 20){
 //			std::cerr<<"acum-:"<<acum;
 			acum = acum % modulo * save % modulo;
 //			std::cerr<<"base: "<<b<<" e: "<<e<<" i: "<<i<<" acum: "<<acum<<'\n';
@@ -129,7 +129,98 @@ inline int powmod200 (long long int b, long long int e, long long int modulo){
 //	std::cerr<<"end:"<<acum<<"\n\n";
 	return acum;
 }
-
+inline int powmod200 (long long int b, long long int e, long long int modulo){
+//	if(e == 0)
+//		return 1;
+//	std::cerr<<"init: "<<b<<" ^ "<<e<<" % "<<modulo<<'\n';
+	long long int acum = 1;
+	long long int rest = e%200;
+	if (e >= 200){
+		long long int save = powmod20(b,200,modulo);
+		for (long long int i = 200; i <= e; i+= 200){
+//			std::cerr<<"acum-:"<<acum;
+			acum = acum % modulo * save % modulo;
+//			std::cerr<<"base: "<<b<<" e: "<<e<<" i: "<<i<<" acum: "<<acum<<'\n';
+#ifdef ERR
+			ciclos ++;
+#endif
+        }
+	}
+//	std::cerr<<"acum+:"<<acum<<' ';
+	acum = acum % modulo * powmod20(b,rest,modulo) % modulo;
+//	std::cerr<<"base: "<<b<<" e: "<<e<<" rest: "<<rest<<" acum: "<<acum<<'\n';
+//	std::cerr<<"end:"<<acum<<"\n\n";
+	return acum;
+}
+inline int powmod2000 (long long int b, long long int e, long long int modulo){
+//	if(e == 0)
+//		return 1;
+//	std::cerr<<"init: "<<b<<" ^ "<<e<<" % "<<modulo<<'\n';
+	long long int acum = 1;
+	long long int rest = e%2000;
+	if (e >= 2000){
+		long long int save = powmod200(b,2000,modulo);
+		for (long long int i = 2000; i <= e; i+= 2000){
+//			std::cerr<<"acum-:"<<acum;
+			acum = acum % modulo * save % modulo;
+//			std::cerr<<"base: "<<b<<" e: "<<e<<" i: "<<i<<" acum: "<<acum<<'\n';
+#ifdef ERR
+			ciclos ++;
+#endif
+        }
+	}
+//	std::cerr<<"acum+:"<<acum<<' ';
+	acum = acum % modulo * powmod200(b,rest,modulo) % modulo;
+//	std::cerr<<"base: "<<b<<" e: "<<e<<" rest: "<<rest<<" acum: "<<acum<<'\n';
+//	std::cerr<<"end:"<<acum<<"\n\n";
+	return acum;
+}
+inline int powmod20000 (long long int b, long long int e, long long int modulo){
+//	if(e == 0)
+//		return 1;
+//	std::cerr<<"init: "<<b<<" ^ "<<e<<" % "<<modulo<<'\n';
+	long long int acum = 1;
+	long long int rest = e%20000;
+	if (e >= 20000){
+		long long int save = powmod2000(b,20000,modulo);
+		for (long long int i = 20000; i <= e; i+= 20000){
+//			std::cerr<<"acum-:"<<acum;
+			acum = acum % modulo * save % modulo;
+//			std::cerr<<"base: "<<b<<" e: "<<e<<" i: "<<i<<" acum: "<<acum<<'\n';
+#ifdef ERR
+			ciclos ++;
+#endif
+        }
+	}
+//	std::cerr<<"acum+:"<<acum<<' ';
+	acum = acum % modulo * powmod2000(b,rest,modulo) % modulo;
+//	std::cerr<<"base: "<<b<<" e: "<<e<<" rest: "<<rest<<" acum: "<<acum<<'\n';
+//	std::cerr<<"end:"<<acum<<"\n\n";
+	return acum;
+}
+inline int powmod2000000 (long long int b, long long int e, long long int modulo){
+//	if(e == 0)
+//		return 1;
+//	std::cerr<<"init: "<<b<<" ^ "<<e<<" % "<<modulo<<'\n';
+	long long int acum = 1;
+	long long int rest = e%2000000;
+	if (e >= 2000000){
+		long long int save = powmod20000(b,2000000,modulo);
+		for (long long int i = 2000000; i <= e; i+= 2000000){
+//			std::cerr<<"acum-:"<<acum;
+			acum = acum % modulo * save % modulo;
+//			std::cerr<<"base: "<<b<<" e: "<<e<<" i: "<<i<<" acum: "<<acum<<'\n';
+#ifdef ERR
+			ciclos ++;
+#endif
+        }
+	}
+//	std::cerr<<"acum+:"<<acum<<' ';
+	acum = acum % modulo * powmod20000(b,rest,modulo) % modulo;
+//	std::cerr<<"base: "<<b<<" e: "<<e<<" rest: "<<rest<<" acum: "<<acum<<'\n';
+//	std::cerr<<"end:"<<acum<<"\n\n";
+	return acum;
+}
 using namespace std;
 inline int powmod(long long int b, long long int e, long long int modulo, int * phisao,int size){
 	//if (e==0)
@@ -157,14 +248,14 @@ inline int powmod(long long int b, long long int e, long long int modulo, int * 
 	int acum = b;
 	for(int i=0; i< iexp; i++){
 		//acum = powmod2(acum, expoentes[i], modulo);
-		acum = powmod200(acum, expoentes[i], modulo);
+		acum = powmod2000000(acum, expoentes[i], modulo);
         #ifdef ERR
         std::cerr<<"exp: "<<expoentes[i]<<" acum: "<<acum<<"\n\n";
         #endif
 	}
 	ciclos += iexp;
 	//acum = powmod2(acum, nexp, modulo);
-	acum = powmod200(acum, nexp, modulo);
+	acum = powmod2000000(acum, nexp, modulo);
 	if (um){
 		acum = acum % modulo * b % modulo;
         #ifdef ERR
@@ -184,17 +275,24 @@ int main(){
 	int n, e;
 	int c;
 	scanf("%d %d %d",&n,&e, &c);
-	int size = sqrt(n);
-
+//	int size = sqrt(n);
+	int size = 200;
 	int * phisao = (int *) malloc(sizeof(int) * size);
 	crivo(size,phisao);
+#ifdef ERR
+    cerr<<"crivo ciclos: "<<ciclos<<endl;
+#endif
 	long long int p, q;
 	fatorar (n, &p, &q, phisao, size);
-	long long int totiente = (p-1)*(q-1);
-	long long int d = gera_chave_d(e,totiente,n);
 #ifdef ERR
-	cerr<<"d: "<<d<<endl;
+    cerr<<"fatorar ciclos: "<<ciclos<<endl;
 	cerr<<"fatoração: "<<p<<" e "<<q<<endl;
+#endif
+	long long int totiente = (p-1)*(q-1);
+	long long int d = gera_chave_d(e,totiente,n,3);
+#ifdef ERR
+    cerr<<"gerar chave ciclos: "<<ciclos<<endl;
+	cerr<<"d: "<<d<<endl;
 // 	long long int a,b;
 // 	cerr<<"totiente:\n";
 // 	fatorar2((int)totiente,&a,&b,phisao,size);

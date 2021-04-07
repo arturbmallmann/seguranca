@@ -18,16 +18,40 @@ def crivo (n):
 			tp +=1
 			l+=[i]
 	return l
-primos = crivo(3500)
+#primos = crivo(3500)
 #print(primos)
+
+def euclides (a, b):
+	r = a
+	r1 = b
+	u = 1
+	v = 0
+	u1 = 0
+	v1 = 1
+# variáveis auxiliares para efetuar trocas
+# rs, us, vs, q
+
+	while (r1 != 0):
+		q = int (r / r1) # pega apenas a parte inteira
+		rs = r
+		us = u
+		vs = v
+		r = r1
+		u = u1
+		v = v1
+		r1 = rs - q *r1
+		u1 = us - q*u
+		v1 = vs - q*v1
+
+	return [r, u, v] # tais que a*u + b*v = r et r = pgcd (a, b)
 
 values = input()
 (n,e,c) = tuple([int(x) for x in values.split(' ')])
 p, q = (0,0)
 ciclos = 0
-#for x in range(3,math.ceil(math.sqrt(n)),2):
-for x in primos:
-	ciclos += 1
+for x in range(3,math.ceil(math.sqrt(n)),2):
+#for x in primos:
+#	ciclos += 1
 	if n % x == 0 :
 #		print(f'multiplos: {x} * {n/x} = {n}')
 		p = int(n/x)
@@ -41,15 +65,11 @@ totiente = (p-1)*(q-1)
 #inverso
 # d * e = 1 mod totiente
 #for d in range(e*2,totiente,totiente%e):
-ciclos = 0
-for d in range(math.floor(math.sqrt(p*q)),totiente,1):
-	ciclos +=1
-#	print (d)
-	if d*e % totiente == 1:
-#		print (f'd: {d}')
-		break
+
 #print(f'ciclos: {ciclos}')
-print(f'd:{d}',file=sys.stderr)
+(r,u,v)=euclides(e,totiente)
+#print(f'u/t: {(r,u,v)}')
 #msg = c**d % n
-msg = pow(c, d, n)
-print (msg)
+print(pow(c,u,n))
+#msg = pow(c, d, n)
+#print (msg)
