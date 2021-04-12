@@ -71,6 +71,30 @@ int gera_chave_d (long long int e, long long int totiente, int n,int inc){
 	
 	return -1;
 }
+/*
+int get_mdc(long long int a , long long int b){
+	int a_r = sqrt(a);
+	int b_r = sqrt(b);
+	int mdc = 1;
+
+	for ( int i = b; i!= 0; i -= 1 ){
+		if ( (a%b) % i==0  && (b%a) % i == 0 )
+			mdc = i;
+	}
+	return mdc;
+}
+*/
+int expbin(long long int a,long long int e,long long int m){
+	if (e == 0)
+		return 1;
+	if (e % 2 == 0){
+		long long int x = expbin(a, (int) e/2, m);
+		return ( (x % m) * (x % m ) ) % m;
+	}
+	long long int y = expbin(a,e-1, m);
+	return ( (a % m) * ( y % m ) ) % m;
+
+}
 
 int powmod2 (long long int b, long long int e,long long int modulo){
 	if(e==0)
@@ -198,25 +222,26 @@ inline int powmod20000 (long long int b, long long int e, long long int modulo){
 //	std::cerr<<"end:"<<acum<<"\n\n";
 	return acum;
 }
-inline int powmod2000000 (long long int b, long long int e, long long int modulo){
-//	if(e == 0)
-//		return 1;
+inline int powmodrec (long long int b, long long int e, long long int modulo){
+	if(e == 0)
+		return 1;
 //	std::cerr<<"init: "<<b<<" ^ "<<e<<" % "<<modulo<<'\n';
+		
 	long long int acum = 1;
-	long long int rest = e%2000000;
-	if (e >= 2000000){
-		long long int save = powmod20000(b,2000000,modulo);
-		for (long long int i = 2000000; i <= e; i+= 2000000){
-//			std::cerr<<"acum-:"<<acum;
+	long long int rest = e%10;
+	if (rest == 0){
+		long long int save = powmodrec(b,int (e/10) ,modulo);
+		for (long long int i = 0; i < 10; i+= 1){
+			std::cerr<<"acum-:"<<acum;
 			acum = acum % modulo * save % modulo;
-//			std::cerr<<"base: "<<b<<" e: "<<e<<" i: "<<i<<" acum: "<<acum<<'\n';
+			std::cerr<<"base: "<<b<<" e: "<<e<<" i: "<<i<<" acum: "<<acum<<'\n';
 #ifdef ERR
 			ciclos ++;
 #endif
         }
 	}
 //	std::cerr<<"acum+:"<<acum<<' ';
-	acum = acum % modulo * powmod20000(b,rest,modulo) % modulo;
+	acum = acum % modulo * powmodrec(b,rest,modulo) % modulo;
 //	std::cerr<<"base: "<<b<<" e: "<<e<<" rest: "<<rest<<" acum: "<<acum<<'\n';
 //	std::cerr<<"end:"<<acum<<"\n\n";
 	return acum;
@@ -248,14 +273,14 @@ inline int powmod(long long int b, long long int e, long long int modulo, int * 
 	int acum = b;
 	for(int i=0; i< iexp; i++){
 		//acum = powmod2(acum, expoentes[i], modulo);
-		acum = powmod2000000(acum, expoentes[i], modulo);
+		acum = powmodrec(acum, expoentes[i], modulo);
         #ifdef ERR
         std::cerr<<"exp: "<<expoentes[i]<<" acum: "<<acum<<"\n\n";
         #endif
 	}
 	ciclos += iexp;
 	//acum = powmod2(acum, nexp, modulo);
-	acum = powmod2000000(acum, nexp, modulo);
+	acum = powmodrec(acum, nexp, modulo);
 	if (um){
 		acum = acum % modulo * b % modulo;
         #ifdef ERR
@@ -289,7 +314,8 @@ int main(){
 	cerr<<"fatoração: "<<p<<" e "<<q<<endl;
 #endif
 	long long int totiente = (p-1)*(q-1);
-	long long int d = gera_chave_d(e,totiente,n,3);
+	long long int d = gera_chave_d(e,totiente,n,1);
+//	long long int d = get_mdc (e, totiente) % n;
 #ifdef ERR
     cerr<<"gerar chave ciclos: "<<ciclos<<endl;
 	cerr<<"d: "<<d<<endl;
@@ -312,7 +338,9 @@ int main(){
 //	cout<<powmod2(c,d,n)<<endl;
 //	cout<<powmod5(c,d,n)<<endl;
 //	cout<<powmod200(c,d,n)<<endl;
-	cout<<powmod (c,d,n,phisao,size)<<endl;
+//	cout<<powmod (c,d,n,phisao,size)<<endl;
+	cout<<expbin(c,d,n)<<endl;
+//	cout<<powmodrec(c,d,n)<<endl;
 #ifdef ERR
     cerr<<"ciclos: "<<ciclos<<endl;
 #endif

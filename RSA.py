@@ -68,6 +68,7 @@ totiente = (p-1)*(q-1)
 
 #print(f'ciclos: {ciclos}')
 (r,u,v)=euclides(e,totiente)
+print (f'd: {u%totiente}',file=sys.stderr)
 #print(f'u/t: {(r,u,v)}')
 #msg = c**d % n
 print(pow(c,u,n))

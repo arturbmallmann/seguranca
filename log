@@ -1,7 +1,11 @@
 py:
-p 2087 q 1427
-d:413289
+p 2239 q 2213
+d: 3123997
 cpp:
 crivo ciclos: 2950
-fatorar ciclos: 4374
-fatoração: 2087 e 1427
+fatorar ciclos: 5160
+fatoração: 2239 e 2213
+D: 3123997 ciclos: 2734136
+gerar chave ciclos: 2739296
+d: 3123997
+ciclos: 2739296
