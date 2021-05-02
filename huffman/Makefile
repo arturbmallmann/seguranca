@@ -1,6 +1,6 @@
 PROJECT_ROOT = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
-OBJS = huffman.o
+OBJS = huffman.o entropy.o
 
 ifeq ($(BUILD_MODE),debug)
 	CFLAGS += -g

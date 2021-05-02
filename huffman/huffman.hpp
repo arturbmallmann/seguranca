@@ -16,21 +16,21 @@ struct {
 }typedef dic_item;
 
 struct {
-	int left; //relative pointer to arvore
-	int right;
-	int qnt;
-	int value; //pointer to dic item
+	char left; //relative pointer to arvore
+	char right;
+	char qnt;
+	char pointer; //pointer to dic item
 }typedef no_arvore;
 //
 //class huffman_tree{
-////	no raiz;
+//
 //	public:
 //		huffman_tree(){
 //
 //		}
 //
 //};
-
+/
 template<typename T>
 void read_file(std::fstream *strm, T *dest,int n=1){
 	strm->read(reinterpret_cast<char *>(dest), sizeof(T)*n);

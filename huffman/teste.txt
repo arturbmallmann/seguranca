@@ -1,0 +1,121 @@
+DD(1)                                                General Commands Manual                                                DD(1)
+
+NOME
+       dd - converte e copia um arquivo
+
+SINOPSE
+       dd   [--help]   [--version]   [if=arquivo]  [of=arquivo]  [ibs=bytes]  [obs=bytes]  [bs=bytes]  [cbs=bytes]  [skip=blocos]
+       [seek=blocos] [count=blocos] [conv={ascii, ebcdic, ibm, block, unblock, lcase, ucase, swab, noerror, notrunc, sync}]
+
+DESCRIÇÃO
+       dd copia um arquivo (da entrada padrão para a saída padrão, por padrão) usando tamanhos  de  blocos  de  entrada  e  saída
+       especificados, enquanto está fazendo opcionalmente conversões nele.
+
+       Ele  lê um bloco de entrada de uma vez, usando o tamanho especificado de um bloco de entrada (o padrão é 512 bytes).  Se a
+       opção bs=bytes é fornecida, e nenhuma conversão a não ser sync, noerror, ou  notrunc  são  especificadas,  ele  escreve  a
+       quantia  de  dados  lidos  (o  qual  pode  ser menor que o requerido) num bloco de saída separada. Este bloco de saída tem
+       precisamente o mesmo tamanho que o lido a menos que a  conversão  sync  seja  especificada,  neste  caso  os  dados  serão
+       preenchidos com NULOS (ou espaços, veja abaixo).
+
+       De outra forma, a entrada, lê um bloco de uma vez, é processada e o resultado é coletado e escrito em blocos com o tamanho
+       de bloco de saída especificado. O bloco final de saída pode ser menor.
+
+       As opções de valor numérico abaixo (bytes e blocos) podem ser seguidas de multiplicadores: 'k'=1024, 'b'=512, 'w'=2, 'c'=1
+       ('w'  e  'c'  são  extensões  GNU;  'w'  nunca deve ser usada - significa 2 em System V e 4 no 4.2BSD).  Duas ou mais tais
+       expressões numéricas podem ser multiplicas colocando 'x' entre elas.  A versão do Utilitários de Arquivo  GNU  4.0  também
+       permite  os  seguintes  sufixos  multiplicativos na especifição de tamanho de bloco (no bs=, cbs=, ibs=, obs=): M=1048576,
+       G=1073741824, e assim para T, P, E, Z, Y.  Um sufixo 'D'  torna-os  decimais:  kD=1000,  MD=1000000,  GD=1000000000,  etc.
+       (Note que para ls, df, du o tamanho de M etc. é determinado por variáveis de ambiente, mas para dd ela é fixa.)
+
+OPÇÕES
+       if=arquivo
+              Lê a partir do arquivo ao invés da entrada padrão.
+
+       of=arquivo
+              Escreve no arquivo ao invés da saída padrão. A menos que conv=notrunc seja fornecido, dd trunca o arquivo para zero
+              bytes (ou para o tamanho especificado com seek=).
+
+       ibs=bytes
+              Lê a quantidade de bytes de uma vez. O padrão é 512.
+
+       obs=bytes
+              Escreve a quantidade de bytes de uma vez. O padrão é 512.
+
+       bs=bytes
+              Lê e escreve a quantidade de bytes de uma vez. Isto cancela ibs e obs.  (E selecionando bs não é equivalente com  a
+              seleção  de  ambos  ibs  e  obs  para  este mesmo valor, pelo menos quando nenhuma conversão exceto sync, noerror e
+              notrunc é especificada, desde que ela estipula que cada bloco de entrada será copiado para a saída  como  um  único
+              bloco sem agregar blocos pequenos.)
+
+       cbs=bytes
+              Especifica a conversão de tamanho de bloco para bloco e não_bloco.
+
+       skip=blocps
+              Salta blocos ibs-byte blocos no arquivo de entrada antes da cópia.
+
+       seek=blocos
+              Salta blocos obs-byte blocos no arquivo de saída antes da cópia.
+
+       count=blocks
+              Copia blocos ibs-byte blocos do arquivo de entrada, ao invés de tudo até o final do arquivo.
+
+       conv=CONVERSÃO[,CONVERSÃO]...
+              Converte o arquivo conforme especificado pelo(s) argumento(s) de CONVERSÃO
+
+              Conversões:
+
+              ascii  Converte EBCDIC para ASCII.
+
+              ebcdic Converte ASCII para EBCDIC.
+
+              ibm    Converte ASCII para EBCDIC alternado.
+
+              block  Para cada linha na entrada, a saída tem cbs bytes, recolocando a nova linha de entrada com espaço e enchendo
+                     com espaços se necessário.
+
+              unblock
+                     Recoloca espaços em cada bloco de entrada cbs-sized como uma nova linha.
+
+              lcase  Altera letras maiúsculas para minúsculas.
+
+              ucase  Altera letras minúsculas para maiúsculas.
+
+              swab   Troca todos os pares de bytes de entrada.  Se um número impar de bytes são lidos  o  último  é  simplesmente
+                     copiado (desde que não haja troca com ele).  [POSIX 1003.2b, interpretações PASC 1003.2 #3 and #4]
+
+              noerror
+                     Continua depois de erros de leitura.
+
+              notrunc
+                     Não trunca o arquivo de saída.
+
+              sync   Enche todos os blocos de entradas para o tamanho de ibs com valores de zero no final.
+
+OPÇÕES PADRÃO GNU
+       --help Imprime a mensagem de uso na saída padrão e sai.
+
+       --version
+              Imprime a versão na saída padrão e sai.
+
+       --     Encerra a lista de opção.
+
+AMBIENTE
+       As variáveis LANG, LC_ALL, LC_CTYPE and LC_MESSAGES tem seu significado usual.
+
+DE ACORDO COM
+       POSIX 1003.2
+
+EXEMPLO
+       Freqüentemente  um controlador de fita não aceita tamanhos de blocos arbitrariamente, e dd induziria um erro de E/S para o
+       último fragmento de dados que não ocupa um bloco completo. Use 'dd if=meu_arquivo of=/dev/mytape conv=sync' para conseguir
+       tudo na fita. É claro, lendo ele novamente você verá um arquivo um pouco maior, com zeros adicionados no fim.
+
+NOTAS
+       Esta  página  descreve  dd  como  é  encontrada  no  pacote  Utilitários de Arquivo 4.0; outras versões podem ser um pouco
+       diferentes.   Envie  correções  e  adições  para  aeb@cwi.nl.   Relatório  de  problemas  no  programa   para   fileutils-
+       bugs@gnu.ai.mit.edu.
+
+TRADUZIDO POR LDP-BR em 21/08/2000.
+       André L. Fassone Canova <lonelywolf@blv.com.br> (tradução) Ricardo C.O. Freitas <english.quest@best-service.com> (revisão)
+
+Utilitários de Arquivo 4.0                                   11/1998                                                        DD(1)

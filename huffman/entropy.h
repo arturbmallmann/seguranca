@@ -8,7 +8,10 @@
 #ifndef ENTROPY_H_
 #define ENTROPY_H_
 
+#include <map>
+#include <algorithm>
 
+double calc_entropy(char * input,int size);
 
 
 
