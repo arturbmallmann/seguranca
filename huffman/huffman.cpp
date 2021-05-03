@@ -1,5 +1,7 @@
 #include "huffman.hpp"
-
+// C
+#include <string.h>
+// C++
 #include <iostream>
 #include <algorithm>
 #include <fstream>
@@ -19,11 +21,10 @@ using namespace std;
 //	readTree(no.left);
 //	return no.value;
 //}
-int main(int argc, char **argv) {
-	char * file_name = argv[argc-1];
+void compress(char * file_name){
 //	fstream input_file = fstream(file_name);
 
-	fstream dic= fstream("dic.data",ios::binary |ios::in |ios::out);
+	fstream dic= fstream(string(file_name)+".ahf",ios::binary |ios::in |ios::out);
 
 	fstream input_file;
 	input_file.open(file_name,ios::in);
@@ -119,3 +120,40 @@ int main(int argc, char **argv) {
 	cout<<"size of char:"<<sizeof(char)<<endl;
 	dic.close();
 }
+
+
+
+char inflate(char _in,char * entradas, no_arvore * no_raiz){
+
+	return 'x';
+}
+using namespace std;
+void decompress(char * file_name){
+	int fns = strlen(file_name);
+	char * outfile_name = (char*) malloc(fns*sizeof(char));
+	strncpy(outfile_name,file_name, fns-4);
+	strncpy(outfile_name+fns-4,".out",4);
+	ofstream output_file = ofstream(outfile_name,ios::out|ios::binary);
+	ifstream input_file = ifstream(file_name,ios::in|ios::binary);
+	dic_header cabecalho;
+	read_file<dic_header>((fstream*)&input_file,&cabecalho);
+
+	output_file.close();
+}
+
+int main(int argc, char **argv) {
+	char * file_name = argv[argc-1];
+	char * action = argv[argc-2];
+	if (!strcmp(action,"-c")||!strcmp(action,"--compress")){
+		cout<<"compress"<<endl;
+		compress(file_name);
+	}else if (!strcmp(action,"-d")||!strcmp(action,"--decompress")){
+		cout<<"decompress..."<<endl;
+		decompress(file_name);
+	}else if (!strcmp(action,"-h")||!strcmp(action,"--help")){
+		cout<<"Usage:\n\tCompress huffman -c original_file\n\tDecompress -d compressed_file\n";
+	}else{
+		compress(file_name);
+	}
+}
+
