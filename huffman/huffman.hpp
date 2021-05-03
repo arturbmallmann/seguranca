@@ -30,7 +30,7 @@ struct {
 //		}
 //
 //};
-/
+
 template<typename T>
 void read_file(std::fstream *strm, T *dest,int n=1){
 	strm->read(reinterpret_cast<char *>(dest), sizeof(T)*n);
