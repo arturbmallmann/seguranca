@@ -16,7 +16,7 @@
 using namespace std;
 void flush_bit (bitstrm * bstrm){
 	write_file<char>((fstream *)bstrm->strm, &bstrm->cache);
-	cout << "Bit cache "<<(int) bstrm->cache << " Flushed!" <<endl;
+//	printf("Bit cache %x Flushed!\n",(int) bstrm->cache);
 	bstrm->cache=0;
 	bstrm->control=0;
 }
@@ -49,16 +49,18 @@ char * change_suffix(char * name,char * sufix){
 	return outfile_name;
 }
 
-void codify_tree (int raiz, char cod, int count, vector<no_arvore> vet_arvore, array<dic_item, 256> items){
+void codify_tree (int raiz, int cod, int count, vector<no_arvore> vet_arvore, dic_item * items){
 	no_arvore no = vet_arvore[raiz];
-	dic_item item = items[no.pointer];
-	if(no.leaf){
-		item.cod = cod;
-		item.cod_bits = count;
+	dic_item * item = &items[no.pointer];
+	if(no.leaf == 1){
+		item->cod = cod;
+		item->cod_bits = (char)count;
+		return;
 	}
 	count ++;
-	codify_tree(no.left, cod<<1,count,vet_arvore,items);
-	codify_tree(no.right, cod<<1 + 1,count,vet_arvore,items);
+	printf("%x(%d)",cod,count);
+	codify_tree(no.left, (cod<<1),count,vet_arvore,items);
+	codify_tree(no.right, (cod<<1) + 1,count,vet_arvore,items);
 }
 
 void compress(char * file_name){
@@ -83,20 +85,20 @@ void compress(char * file_name){
 	char it;
 	for(int i =0;i <size; i++){
 		read_file<char>(&input_file, &it);
-		cout<<it;
-		cout<<" => ";
+//		cout<<it;
+//		cout<<" => ";
 		auto fresult = mapa_entradas.find(it);
 		if(fresult==mapa_entradas.end()){
 			dic_item value;
 			value.c = (char)it;
-			value.cod = (char)0;
+			value.cod = 0;
 			value.cod_bits = (char)0;
 			value.qnt = (char)1;
 			mapa_entradas.insert(pair<char,dic_item>(it,value));
 		}else{
 			mapa_entradas[it].qnt++;
 		}
-		cout<<(int)mapa_entradas[it].qnt<<endl;
+//		cout<<(int)mapa_entradas[it].qnt<<endl;
 		texto[i]=it;
 //		}
 	}
@@ -104,18 +106,18 @@ void compress(char * file_name){
 //	sort(mapping.begin(),mapping.end());//,[](const dic_item a, const dic_item b){
 //		return a.qnt < b.qnt;
 //	});
-	array<dic_item, 256> entries; //nós
+//	vector<dic_item> entries; //nós
+	dic_item entries[1000];
 	vector<no_arvore> reducao_arvore; //nós
 	vector<no_arvore> arquivo_arvore;
-	int tree_count = 0;
 	dic_header cabecalho;
 	cabecalho.n_entradas=mapa_entradas.size();
 	cabecalho.beg_tree=sizeof(dic_header)+ mapa_entradas.size() * sizeof(dic_item);
 	cabecalho.original_size=size;
+	cabecalho.zip_size=0;
 	write_file<dic_header>(&dic, &cabecalho);
-	int array_count = 0;
-	for(auto it:mapa_entradas){
-		entries[array_count++]=it.second;
+	int tree_count = 0;
+	for(pair<char,dic_item> it:mapa_entradas){
 		//ar_itens[ar_count++]=it.second;
 		no_arvore no;
 		no.left=(char)-1;//-1 e -1 é final
@@ -123,16 +125,25 @@ void compress(char * file_name){
 		no.leaf = 1;
 		no.pointer=tree_count++;//ponteiros para entradas
 		no.qnt=(int)it.second.qnt;
+
+		entries[tree_count] = it.second;
 		reducao_arvore.push_back(no);
 		arquivo_arvore.push_back(no);//grava entradas "Entries"
 	}
-
-	cout<<"Número de entradas: "<<array_count<<"\n"<<endl;
+	int size_entries=tree_count;
+	cout<<"Número de entradas: "<<tree_count<<"\n"<<endl;
 	int camada=0;
 	while(reducao_arvore.size()>1){
 		sort(reducao_arvore.begin(),reducao_arvore.end(),[](const no_arvore a, const no_arvore b){
-					return a.qnt < b.qnt;
-				});
+//					if( a.qnt == b.qnt){
+//						if(!a.leaf)
+//							return true;
+//						else
+//							return false;
+//					}else{
+						return a.qnt < b.qnt;
+//					}
+		});
 
 		no_arvore * novo = (no_arvore*)malloc(sizeof(no_arvore));
 		novo->leaf=0;
@@ -141,11 +152,10 @@ void compress(char * file_name){
 //		dic_item left=entries[reducao_arvore[0].pointer];//modifica entradas
 //		dic_item right=entries[reducao_arvore[1].pointer];
 
-		novo->left=reducao_arvore[0].pointer; //ponteiro para a propria arvore
-		novo->right=reducao_arvore[1].pointer;
+			novo->left=reducao_arvore[0].pointer; //ponteiro para a propria arvore
+			novo->right=reducao_arvore[1].pointer;
 
-		cout<<"Ciclos: "<<(++camada)<<" cod: "<<(int)entries[reducao_arvore[1].pointer].cod;
-		cout<<" char: "<<entries[reducao_arvore[1].pointer].c<<endl;
+		cout<<"Ciclos: "<<(++camada)<<" char: "<<entries[reducao_arvore[1].pointer].c<<endl;
 
 		novo->qnt=(char)reducao_arvore[0].qnt + reducao_arvore[1].qnt;
 		novo->pointer=tree_count++;// ponteiro dentro da própria árvore
@@ -157,22 +167,52 @@ void compress(char * file_name){
 	}
 
 	no_arvore raiz = reducao_arvore[0];
-	cout << "filhos de raiz: "<<(int)raiz.qnt <<" pointer: "<<raiz.pointer<< endl;
+	cout << "filhos de raiz: "<<(int)raiz.qnt <<" pointer: "<<(int)raiz.pointer<< endl;
 
 	codify_tree(raiz.pointer, 0, 0, arquivo_arvore, entries);
-	for(dic_item it: entries)
+	for(int i=0;i<size_entries;i++){
+		dic_item it = entries[i];
+		printf("char %c cod %x size %d qnt %d\n",it.c,it.cod,it.cod_bits,it.qnt);
 		write_file<dic_item>(&dic, &it);
-	for(no_arvore it: arquivo_arvore)
+	}
+	for(no_arvore it: arquivo_arvore){
+//		cout<<"pointer "<<(int)it.pointer<<endl;
 		write_file<no_arvore>(&dic, &it);
+	}
 
 	bitstrm bstm;
-	bstm.strm=&dic;
+	bstm.strm=&dic;//arquivo para gravar
+
+	cout<<"Comprimindo:\n";
+	input_file.seekg(0, ios::beg);
+	for(int i =0;i < size; i++){
+		char c;
+		read_file<char>(&input_file,&c);
+//		cout<<c;
+		auto iter = mapa_entradas.find(c);
+		int o=0;
+		for ( ; o < mapa_entradas.size();o++)
+			if (entries[o].c==c)
+				break;
+		dic_item item = entries[o];
+//		cout<<(char)entries[o].c;
+		printf("%c %x(%d)[",item.c,item.cod,item.cod_bits);
+		if (item.cod_bits != 0){
+			for (int z=32-item.cod_bits; z < 32 ;z++){
+				write_bit(&bstm,((item.cod << z) & 0x80000000) == 0x80000000);
+			//	cout<<'>'<<(7-z)<<"< ";
+				printf(",%x z=%d",((item.cod << z)& 0x80000000) == 0x80000000,z);
+				cabecalho.zip_size++;
+			}
+		}
+		cout<<"]\n";
+	}
 //	char bits[10]="Bits f:";
 //	write_file<char>(&dic,bits,strlen(bits));
 //	cout<<bits<<dic.tellg()<<endl;
 
-
-	cout<<"Cache:"<<endl;
+/*
+	cout<<"teste:"<<endl;
 	write_bit(&bstm,0);
 	write_bit(&bstm,1);
 	write_bit(&bstm,1);
@@ -184,12 +224,16 @@ void compress(char * file_name){
 
 	write_bit(&bstm,1);
 
-	flush_bit(&bstm);// empurra os bits que faltam
+
+	*/
+	// empurra os bits que faltam
 	//dic.seekg(cabecalho.beg_tree,ios::beg);
-	cout<<"pos\ng: "<<dic.tellg()<<" p: "<<dic.tellp()<<endl;
-	cout<<"size of dic_item:"<<sizeof(dic_item)<<endl;
-	cout<<"size of no_arvore:"<<sizeof(no_arvore)<<endl;
-	cout<<"size of char:"<<sizeof(char)<<endl;
+	flush_bit(&bstm);
+	cout<<"\npos\ng: "<<dic.tellg()<<" p: "<<dic.tellp()<<endl;
+//	cout<<"size of dic_item:"<<sizeof(dic_item)<<endl;
+//	cout<<"size of no_arvore:"<<sizeof(no_arvore)<<endl;
+//	cout<<"size of char:"<<sizeof(char)<<endl;
+	cout<<"Bits original size: "<<size*8<<" zip size: "<<cabecalho.zip_size<<endl;
 	dic.close();
 }
 
@@ -251,7 +295,6 @@ int main(int argc, char **argv) {
 	}else{
 		compress(file_name);
 	}
-	cout << (int)((char)0x7f>>1) <<endl;
 	cout << "size of bool: " << sizeof(bool) << endl;
 }
 

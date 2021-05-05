@@ -23,9 +23,9 @@ double calc_entropy(char * input,int size){
 	}
 	double h=0.0, prob = 0.0;
 	double b_log = log10(char_qnt.size());
-	cout << "caracteres: " << char_qnt.size()<<" tam total: "<<size<<endl;
+//	cout << "caracteres: " << char_qnt.size()<<" tam total: "<<size<<endl;
 	for (auto pair_kv: char_qnt){
-		cout << "Char: "<<pair_kv.first<<" qnt: "<<pair_kv.second<<endl;
+//		cout << "Char: "<<pair_kv.first<<" qnt: "<<pair_kv.second<<endl;
 		prob = (double)pair_kv.second/size;
 		h -=  prob * (log10(prob)/b_log) ;
 	}

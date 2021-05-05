@@ -13,16 +13,16 @@ struct {
 
 struct {
 	char c;
-	char cod;
+	int cod; //
 	char cod_bits;
 	int qnt;
 }typedef dic_item;
 
 struct {
 	char leaf;
-	char left; //relative pointer to arvore
-	char right;
-	char pointer; //ponteiro próprio ou na folha para dic_item
+	int left; //relative pointer to arvore
+	int right;
+	int pointer; //ponteiro próprio ou na folha para dic_item
 	int qnt;
 }typedef no_arvore;
 
