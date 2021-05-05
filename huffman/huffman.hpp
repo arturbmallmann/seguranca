@@ -3,24 +3,34 @@
 
 #include <fstream>
 struct {
-	int size;
-	int tree_pointers;
+	int n_entradas;
+	int beg_tree;
 	int root_tree;
+	int n_tree;
+	int original_size;
+	int zip_size;
 }typedef dic_header;
 
 struct {
 	char c;
-	char size;
 	char cod;
-	char qnt;
+	char cod_bits;
+	int qnt;
 }typedef dic_item;
 
 struct {
+	char leaf;
 	char left; //relative pointer to arvore
 	char right;
-	char qnt;
-	char pointer; //pointer to dic item
+	char pointer; //ponteiro próprio ou na folha para dic_item
+	int qnt;
 }typedef no_arvore;
+
+struct {
+	std::fstream * strm;
+	char cache=0;
+	int control=0;
+}typedef bitstrm;
 //
 //class huffman_tree{
 //

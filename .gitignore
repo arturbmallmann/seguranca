@@ -3,3 +3,7 @@ a.out
 *.o
 *.exec
 *.tar.gz
+huffman/.settings
+huffman/.project
+huffman/.cproject
+huffman/huffman
