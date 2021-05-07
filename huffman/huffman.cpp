@@ -52,10 +52,7 @@ void codify_tree (int raiz, int cod, int count, vector<no_arvore> vet_arvore, di
 	no_arvore no = vet_arvore[raiz];
 	dic_item * item = &items[no.pointer];
 //	cout<<"atual: "<<item->c<<'('<<raiz<<") filhos: "<<no.left<<" esq, "<<no.right<<" direita.\n";
-	if(no.right!=-1)
-		cerr<<"n"<<raiz<<" -> "<<"n"<<no.right<<";\n";
-	if(no.left!=-1)
-		cerr<<"n"<<raiz<<" -> "<<"n"<<no.left<<";\n";
+
 	if(no.leaf == 1){
 		item->cod = cod;
 		item->cod_bits = (char)count;
@@ -65,6 +62,8 @@ void codify_tree (int raiz, int cod, int count, vector<no_arvore> vet_arvore, di
 	}
 	count ++;
 //	printf("%x(%d)",cod,count);
+	cerr<<"n"<<raiz<<" -> "<<"n"<<no.left<<"[label=\"0\"];\n";
+	cerr<<"n"<<raiz<<" -> "<<"n"<<no.right<<"[label=\"1\"];\n";
 	codify_tree(no.left, (cod<<1),count,vet_arvore,items);
 	codify_tree(no.right, (cod<<1) + 1,count,vet_arvore,items);
 }
@@ -209,12 +208,14 @@ void compress(char * file_name){
 				break;
 		dic_item item = entries[o];
 //		cout<<(char)entries[o].c;
-		printf("%c %x(%d)[",item.c,item.cod,item.cod_bits);
+//		printf("%c %x(%d)[",item.c,item.cod,item.cod_bits);
+		cout<<'[';
 		if (item.cod_bits != 0){
 			for (int z=32-item.cod_bits; z < 32 ;z++){
 				write_bit(&bstm,((item.cod << z) & 0x80000000) == 0x80000000);
 			//	cout<<'>'<<(7-z)<<"< ";
-				printf(",%x z=%d",((item.cod << z)& 0x80000000) == 0x80000000,z);
+//				printf(",%x z=%d",((item.cod << z)& 0x80000000) == 0x80000000,z);
+				cout<<(((item.cod << z)& 0x80000000) == 0x80000000);
 				cabecalho.zip_size++;
 			}
 		}
@@ -248,11 +249,13 @@ int seek_tree(no_arvore * tree_vect, int * position,char * zipped,int raiz){ //p
 		return no->pointer;
 	else{
 		*position=*position+1;
-		if( 0x1&(leitura >> 7-(*position%8) )==1  ){
-			cout<<1;
+//		cout<<"pos"<<*position<<' '<<(int)(0x80&(leitura << (*position-1)%8 ))<<' ';
+//		if( (0x80&(leitura << (*position-1)%8 ) )== 0x80  ){
+		if( (0x1&(leitura >> (*position-1)%8 ) )== 0x1  ){
+//			cout<<1<<endl;
 			return seek_tree(tree_vect,position,zipped,(int)no->right);
 		}else{
-			cout<<0;
+//			cout<<0<<endl;
 			return seek_tree(tree_vect, position,zipped,(int)no->left);
 		}
 	}
@@ -293,7 +296,7 @@ void decompress(char * file_name){
 	char aaa[10];
 	while (position<cabecalho.zip_size){
 		int c = seek_tree(arvore, &position, zipped, cabecalho.root_tree);
-		cout<<entradas[c].c<<endl<<flush;
+		cout<<entradas[c].c;
 //		cin>>aaa;
 		//write_file((fstream*)&output_file, &entradas[c].c);
 	}
