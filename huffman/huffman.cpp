@@ -251,7 +251,7 @@ int seek_tree(no_arvore * tree_vect, int * position,char * zipped,int raiz){ //p
 		*position=*position+1;
 //		cout<<"pos"<<*position<<' '<<(int)(0x80&(leitura << (*position-1)%8 ))<<' ';
 //		if( (0x80&(leitura << (*position-1)%8 ) )== 0x80  ){
-		if( (0x1&(leitura >> (*position-1)%8 ) )== 0x1  ){
+		if( (0x1&0x7f&(leitura >> (*position-1)%8 ) )== 0x1  ){
 //			cout<<1<<endl;
 			return seek_tree(tree_vect,position,zipped,(int)no->right);
 		}else{
@@ -292,14 +292,18 @@ void decompress(char * file_name){
 		printf("%x ",(unsigned int)zipped[i]);
 	}
 	int position = 0;
-	cout<<"\nreading at5:"<<input_file.tellg()<<"from"<<size<<endl<<flush;
+	char spc[101];
+	spc[100]='\n';
+	for(int i=0;i<100;i++){spc[i]='=';}
+	cout<<"\nreading at5:"<<input_file.tellg()<<"from"<<size<<"\noutput:"<<spc;
 	char aaa[10];
 	while (position<cabecalho.zip_size){
 		int c = seek_tree(arvore, &position, zipped, cabecalho.root_tree);
 		cout<<entradas[c].c;
 //		cin>>aaa;
-		//write_file((fstream*)&output_file, &entradas[c].c);
+//		write_file<char>((fstream*)&output_file, &(entradas[c].c));
 	}
+	cout<<"\n"<<spc;
 	output_file.close();
 }
 
@@ -323,20 +327,19 @@ int main(int argc, char **argv) {
 //	for(int i = 0;i<8;i++)
 //		write_bit(&bstm, 1);
 //	bin_test.close();
+	if(argc > 2){
 	char * file_name = argv[argc-1];
 	char * action = argv[argc-2];
 //	int n = 2; cout << "teste bit:"<<(0x80 >>  (7-(n%8) ))<<endl; //mover bits pra direita conforme o número de n
 	if (!strcmp(action,"-c")||!strcmp(action,"--compress")){
-		cout<<"compress"<<endl;
+		cout<<"compress..."<<endl;
 		compress(file_name);
 	}else if (!strcmp(action,"-d")||!strcmp(action,"--decompress")){
 		cout<<"decompress..."<<endl;
 		decompress(file_name);
-	}else if (!strcmp(action,"-h")||!strcmp(action,"--help")){
-		cout<<"Usage:\n\tCompress huffman -c original_file\n\tDecompress -d compressed_file\n";
-	}else{
-		compress(file_name);
+	}}
+	else {
+		cout<<"Usage:\n\tCompress: ./huffman -c original_file\n\tDecompress: ./huffman -d compressed_file\n";
 	}
-	cout << "size of bool: " << sizeof(bool) << endl;
 }
 
