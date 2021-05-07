@@ -15,6 +15,11 @@ endif
 
 all:	huffman
 
+plot:
+	./huffman -c ${FILE} 2> grafo.dot
+	dot grafo.dot -Tpng > grafo.png
+	gwenview grafo.png &> /dev/null &
+
 huffman:	$(OBJS)
 	$(CXX) $(LDFLAGS) -o $@ $^
 

@@ -10,7 +10,6 @@
 //#include <hash_set>
 #include <vector>
 #include <map>
-
 #include "entropy.h"
 
 using namespace std;
@@ -23,12 +22,12 @@ void flush_bit (bitstrm * bstrm){
 
 void write_bit (bitstrm * bstrm,char bit){
 	bit = bit & 0x1;
-	if(bstrm->control == 8){
-		flush_bit(bstrm);
-	}
 	bstrm->cache = bstrm->cache>>1 & 0x7f; //zero no mais significativo
 	bstrm->cache += (char)(bit<<7);
 	bstrm->control++;
+	if(bstrm->control == 8){
+		flush_bit(bstrm);
+	}
 }
 
 //dic_item * readTree(vector<no_arvore> ar_itens, no_arvore no){
@@ -45,20 +44,27 @@ char * change_suffix(char * name,char * sufix){
 	int sufix_size = strlen(sufix);
 	char * outfile_name = (char*) malloc((name_size - dot + sufix_size +1) * sizeof(char));
 	strncpy(outfile_name,name,dot);
-	strncpy((char*)outfile_name+dot,sufix,sufix_size);
+	strcpy((char*)&outfile_name[dot],sufix);
 	return outfile_name;
 }
 
 void codify_tree (int raiz, int cod, int count, vector<no_arvore> vet_arvore, dic_item * items){
 	no_arvore no = vet_arvore[raiz];
 	dic_item * item = &items[no.pointer];
+//	cout<<"atual: "<<item->c<<'('<<raiz<<") filhos: "<<no.left<<" esq, "<<no.right<<" direita.\n";
+	if(no.right!=-1)
+		cerr<<"n"<<raiz<<" -> "<<"n"<<no.right<<";\n";
+	if(no.left!=-1)
+		cerr<<"n"<<raiz<<" -> "<<"n"<<no.left<<";\n";
 	if(no.leaf == 1){
 		item->cod = cod;
 		item->cod_bits = (char)count;
+//		cout<<"leaf\n";
+//		cout<<"\ngiving id:"<<item->c<<" cod "<<item->cod<<" bits "<<(int)item->cod_bits<<endl;
 		return;
 	}
 	count ++;
-	printf("%x(%d)",cod,count);
+//	printf("%x(%d)",cod,count);
 	codify_tree(no.left, (cod<<1),count,vet_arvore,items);
 	codify_tree(no.right, (cod<<1) + 1,count,vet_arvore,items);
 }
@@ -115,7 +121,9 @@ void compress(char * file_name){
 	cabecalho.beg_tree=sizeof(dic_header)+ mapa_entradas.size() * sizeof(dic_item);
 	cabecalho.original_size=size;
 	cabecalho.zip_size=0;
-	write_file<dic_header>(&dic, &cabecalho);
+//	write_file<dic_header>(&dic, &cabecalho);
+	dic.seekp(sizeof(dic_header), ios::beg);
+	cout<<"tellg:"<<dic.tellg()<<endl;
 	int tree_count = 0;
 	for(pair<char,dic_item> it:mapa_entradas){
 		//ar_itens[ar_count++]=it.second;
@@ -123,10 +131,10 @@ void compress(char * file_name){
 		no.left=(char)-1;//-1 e -1 é final
 		no.right=(char)-1;
 		no.leaf = 1;
-		no.pointer=tree_count++;//ponteiros para entradas
+		no.pointer=tree_count;//ponteiros para entradas
 		no.qnt=(int)it.second.qnt;
 
-		entries[tree_count] = it.second;
+		entries[tree_count++] = it.second;
 		reducao_arvore.push_back(no);
 		arquivo_arvore.push_back(no);//grava entradas "Entries"
 	}
@@ -135,14 +143,7 @@ void compress(char * file_name){
 	int camada=0;
 	while(reducao_arvore.size()>1){
 		sort(reducao_arvore.begin(),reducao_arvore.end(),[](const no_arvore a, const no_arvore b){
-//					if( a.qnt == b.qnt){
-//						if(!a.leaf)
-//							return true;
-//						else
-//							return false;
-//					}else{
-						return a.qnt < b.qnt;
-//					}
+			return a.qnt < b.qnt;
 		});
 
 		no_arvore * novo = (no_arvore*)malloc(sizeof(no_arvore));
@@ -152,42 +153,54 @@ void compress(char * file_name){
 //		dic_item left=entries[reducao_arvore[0].pointer];//modifica entradas
 //		dic_item right=entries[reducao_arvore[1].pointer];
 
-			novo->left=reducao_arvore[0].pointer; //ponteiro para a propria arvore
-			novo->right=reducao_arvore[1].pointer;
+		novo->left=reducao_arvore[0].pointer; //ponteiro para a propria arvore
+		novo->right=reducao_arvore[1].pointer;
 
-		cout<<"Ciclos: "<<(++camada)<<" char: "<<entries[reducao_arvore[1].pointer].c<<endl;
+		cout<<"Ciclos: "<<(++camada)<<" chars: "<<entries[reducao_arvore[0].pointer].c<<' '<<entries[reducao_arvore[1].pointer].c<<endl;
 
 		novo->qnt=(char)reducao_arvore[0].qnt + reducao_arvore[1].qnt;
 		novo->pointer=tree_count++;// ponteiro dentro da própria árvore
-		reducao_arvore.erase(reducao_arvore.begin());
+		reducao_arvore.erase(reducao_arvore.begin()+1);
 		reducao_arvore.erase(reducao_arvore.begin());
 		reducao_arvore.push_back(*novo);
 		arquivo_arvore.push_back(*novo);//arquivo
 //		itens[array_count++]=novo;
 	}
-
+	cerr<<"digraph regexp {\n";
+	for(auto no:arquivo_arvore){
+		char c = entries[no.pointer].c;
+		int qnt = no.qnt;
+		c = (c>='a' && c<='z') || (c>='A' && c<='Z') ?c: c=='\n'?'@':' ';
+		char l = no.leaf == 1? 'l':'_';
+		cerr<<'n'<<no.pointer<<" [label=\"("<<c<<") "<<qnt<<"\"];\n";
+	}
 	no_arvore raiz = reducao_arvore[0];
-	cout << "filhos de raiz: "<<(int)raiz.qnt <<" pointer: "<<(int)raiz.pointer<< endl;
+//	if (raiz.leaf)
+
+//	cout << "filhos de raiz: "<<(int)raiz.qnt <<" pointer: "<<(int)raiz.pointer<< endl<<endl;
 
 	codify_tree(raiz.pointer, 0, 0, arquivo_arvore, entries);
+	cerr<<"}\n";
 	for(int i=0;i<size_entries;i++){
 		dic_item it = entries[i];
 		printf("char %c cod %x size %d qnt %d\n",it.c,it.cod,it.cod_bits,it.qnt);
 		write_file<dic_item>(&dic, &it);
 	}
+	cout<<"fim entradas:"<<dic.tellg()<<endl;
 	for(no_arvore it: arquivo_arvore){
-//		cout<<"pointer "<<(int)it.pointer<<endl;
+		cout<<"pointer "<<(int)it.pointer<<endl;
 		write_file<no_arvore>(&dic, &it);
 	}
+	cout<<"fim arvore:"<<dic.tellg()<<endl;
 
 	bitstrm bstm;
 	bstm.strm=&dic;//arquivo para gravar
 
 	cout<<"Comprimindo:\n";
-	input_file.seekg(0, ios::beg);
+//	input_file.seekg(0, ios::beg);
 	for(int i =0;i < size; i++){
-		char c;
-		read_file<char>(&input_file,&c);
+		char c=texto[i];
+//		read_file<char>(&input_file,&c);
 //		cout<<c;
 		auto iter = mapa_entradas.find(c);
 		int o=0;
@@ -207,29 +220,14 @@ void compress(char * file_name){
 		}
 		cout<<"]\n";
 	}
-//	char bits[10]="Bits f:";
-//	write_file<char>(&dic,bits,strlen(bits));
-//	cout<<bits<<dic.tellg()<<endl;
 
-/*
-	cout<<"teste:"<<endl;
-	write_bit(&bstm,0);
-	write_bit(&bstm,1);
-	write_bit(&bstm,1);
-	write_bit(&bstm,1);
-	write_bit(&bstm,0);
-	write_bit(&bstm,0);
-	write_bit(&bstm,0);
-	write_bit(&bstm,0);
-
-	write_bit(&bstm,1);
-
-
-	*/
 	// empurra os bits que faltam
-	//dic.seekg(cabecalho.beg_tree,ios::beg);
 	flush_bit(&bstm);
 	cout<<"\npos\ng: "<<dic.tellg()<<" p: "<<dic.tellp()<<endl;
+	dic.seekg(0, ios::beg);
+	cabecalho.n_tree=arquivo_arvore.size();
+	cabecalho.root_tree=raiz.pointer;
+	write_file<dic_header>(&dic, &cabecalho);//grava zip size etc..
 //	cout<<"size of dic_item:"<<sizeof(dic_item)<<endl;
 //	cout<<"size of no_arvore:"<<sizeof(no_arvore)<<endl;
 //	cout<<"size of char:"<<sizeof(char)<<endl;
@@ -239,16 +237,24 @@ void compress(char * file_name){
 
 
 
-int seek_tree(no_arvore * tree_vect, int * position,char * zipped,no_arvore * no){ //position bit a bit
-	int leitura = zipped[*position/8];
+int seek_tree(no_arvore * tree_vect, int * position,char * zipped,int raiz){ //position bit a bit
+//	cout<<"ponteiro atual:"<<raiz<<endl<<flush;
+	char leitura = zipped[*position / 8];
+	no_arvore * no = & tree_vect[raiz];
+//	cout<<"filhos: "<<no->left<<' '<<no->right<<endl<<flush;
+//	cout<<"position: "<<*position<<'['<<*position / 8<<"] leitura: "<<leitura<<endl<<flush;
+//	*position=*position+1;
 	if (no->leaf)
 		return no->pointer;
 	else{
-		*position++;
-		if( 0x1 & leitura >> (7-(*position%8) ) )
-			return seek_tree(tree_vect,position,zipped,&tree_vect[(int)no->right]);
-		else
-			return seek_tree(tree_vect, position,zipped,&tree_vect[(int)no->left]);
+		*position=*position+1;
+		if( 0x1&(leitura >> 7-(*position%8) )==1  ){
+			cout<<1;
+			return seek_tree(tree_vect,position,zipped,(int)no->right);
+		}else{
+			cout<<0;
+			return seek_tree(tree_vect, position,zipped,(int)no->left);
+		}
 	}
 }
 using namespace std;
@@ -261,26 +267,59 @@ void decompress(char * file_name){
 	int size = input_file.tellg();
 	input_file.seekg(0, ios::beg);
 	dic_header cabecalho;
-	dic_item * entradas = (dic_item*) malloc(sizeof(dic_item) * cabecalho.n_entradas);
-	no_arvore * arvore = (no_arvore*) malloc(sizeof(no_arvore) * cabecalho.n_entradas);
 	read_file<dic_header>((fstream*)&input_file,&cabecalho);
-	//for ( int i = 0 ; i < cabecalho.n_entradas; i++)
-		read_file<dic_item>((fstream *)&input_file, entradas,cabecalho.n_entradas);
-	//while (input_file.tellg()==size)
-		read_file<no_arvore>((fstream *)&input_file, arvore,cabecalho.n_tree);
+	dic_item * entradas = (dic_item*) malloc(sizeof(dic_item) * cabecalho.n_entradas);
+	no_arvore * arvore = (no_arvore*) malloc(sizeof(no_arvore) * cabecalho.n_tree);
+
+	cout<<"cabecalho\nentradas: "<<cabecalho.n_entradas<<" raiz arvore:"<<cabecalho.root_tree<<endl<<flush;
+	cout<<"tellg: "<<input_file.tellg()<<"from"<<size<<endl<<flush;
+	for ( int i = 0 ; i < cabecalho.n_entradas; i++){
+		read_file<dic_item>((fstream *)&input_file, &entradas[i]);
+		cout<<entradas[i].c<<'['<<(int)entradas[i].c<<"] cod>"<<entradas[i].cod<<endl;
+	}
+	cout<<"end entradas:"<<input_file.tellg()<<"from"<<size<<endl<<flush;
+	for ( int i = 0 ; i < cabecalho.n_tree; i++)
+		read_file<no_arvore>((fstream *)&input_file, &arvore[i]);
 	// a partir daqui o stream começa a parte "zipada"
-	int zip_size = size - input_file.tellg();
-	char * zipped = (char*) malloc(zip_size);// 8* pois
-	read_file<char>((fstream *)&input_file, zipped, zip_size);
+	cout<<"End Arvore:"<<input_file.tellg()<<"from"<<size<<endl<<flush;
+	cout<<"zip size:"<<cabecalho.zip_size<<endl<<flush;
+	char * zipped = (char*) malloc(cabecalho.zip_size/8 + 1);// 8* pois
+	for ( int i = 0 ; i < (cabecalho.zip_size/8) + 1;i++){
+		read_file<char>((fstream *)&input_file, &zipped[i]);
+		printf("%x ",(unsigned int)zipped[i]);
+	}
 	int position = 0;
-	while (input_file.tellg()==size){
-		int c = seek_tree(arvore, &position, zipped, &arvore[cabecalho.root_tree]);
-		write_file((fstream*)&output_file, &entradas[c]);
+	cout<<"\nreading at5:"<<input_file.tellg()<<"from"<<size<<endl<<flush;
+	char aaa[10];
+	while (position<cabecalho.zip_size){
+		int c = seek_tree(arvore, &position, zipped, cabecalho.root_tree);
+		cout<<entradas[c].c<<endl<<flush;
+//		cin>>aaa;
+		//write_file((fstream*)&output_file, &entradas[c].c);
 	}
 	output_file.close();
 }
 
 int main(int argc, char **argv) {
+//	fstream bin_test = fstream("bin_test",ios::binary|ios::out);
+//	bitstrm bstm;
+//	bstm.strm=&bin_test;
+//	for (int o = 0; o <2;o++){
+//
+//		for(int i = 0;i<4;i++)
+//			write_bit(&bstm, 1);
+//		for(int i = 0;i<4;i++)
+//			write_bit(&bstm, 0);
+//		for(int i = 0;i<8;i++)
+//			write_bit(&bstm, 1);
+//	}
+//	for(int i = 0;i<8;i++)
+//		write_bit(&bstm, 0);
+//	for(int i = 0;i<8;i++)
+//		write_bit(&bstm, 1);
+//	for(int i = 0;i<8;i++)
+//		write_bit(&bstm, 1);
+//	bin_test.close();
 	char * file_name = argv[argc-1];
 	char * action = argv[argc-2];
 //	int n = 2; cout << "teste bit:"<<(0x80 >>  (7-(n%8) ))<<endl; //mover bits pra direita conforme o número de n

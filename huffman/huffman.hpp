@@ -13,7 +13,7 @@ struct {
 
 struct {
 	char c;
-	int cod; //
+	unsigned int cod; //
 	char cod_bits;
 	int qnt;
 }typedef dic_item;
