@@ -14,10 +14,11 @@
 
 using namespace std;
 void flush_bit (bitstrm * bstrm){
-	write_file<char>((fstream *)bstrm->strm, &bstrm->cache);
 //	printf("Bit cache %x Flushed!\n",(int) bstrm->cache);
-	bstrm->cache=0;
+	bstrm->cache = bstrm->cache>>(8-(bstrm->control));
 	bstrm->control=0;
+	write_file<char>((fstream *)bstrm->strm, &bstrm->cache);
+	bstrm->cache=0;
 }
 
 void write_bit (bitstrm * bstrm,char bit){
@@ -260,6 +261,7 @@ int seek_tree(no_arvore * tree_vect, int * position,char * zipped,int raiz){ //p
 		}
 	}
 }
+char * spc;
 using namespace std;
 void decompress(char * file_name){
 	char sufix [5] = ".out";
@@ -289,14 +291,11 @@ void decompress(char * file_name){
 	char * zipped = (char*) malloc(cabecalho.zip_size/8 + 1);// 8* pois
 	for ( int i = 0 ; i < (cabecalho.zip_size/8) + 1;i++){
 		read_file<char>((fstream *)&input_file, &zipped[i]);
-		printf("%x ",(unsigned int)zipped[i]);
+//		printf("%x ",(unsigned int)zipped[i]);
 	}
-	int position = 0;
-	char spc[101];
-	spc[100]='\n';
-	for(int i=0;i<100;i++){spc[i]='=';}
 	cout<<"\nreading at5:"<<input_file.tellg()<<"from"<<size<<"\noutput:"<<spc;
 	char aaa[10];
+	int position = 0;
 	while (position<cabecalho.zip_size){
 		int c = seek_tree(arvore, &position, zipped, cabecalho.root_tree);
 		cout<<entradas[c].c;
@@ -304,29 +303,17 @@ void decompress(char * file_name){
 //		write_file<char>((fstream*)&output_file, &(entradas[c].c));
 	}
 	cout<<"\n"<<spc;
+	cout<<"entropia: "<<calc_entropy(zipped, cabecalho.zip_size/8 + 1)<<endl;
 	output_file.close();
 }
 
 int main(int argc, char **argv) {
-//	fstream bin_test = fstream("bin_test",ios::binary|ios::out);
-//	bitstrm bstm;
-//	bstm.strm=&bin_test;
-//	for (int o = 0; o <2;o++){
-//
-//		for(int i = 0;i<4;i++)
-//			write_bit(&bstm, 1);
-//		for(int i = 0;i<4;i++)
-//			write_bit(&bstm, 0);
-//		for(int i = 0;i<8;i++)
-//			write_bit(&bstm, 1);
-//	}
-//	for(int i = 0;i<8;i++)
-//		write_bit(&bstm, 0);
-//	for(int i = 0;i<8;i++)
-//		write_bit(&bstm, 1);
-//	for(int i = 0;i<8;i++)
-//		write_bit(&bstm, 1);
-//	bin_test.close();
+	int term_size = 55;
+	spc = (char*)malloc (sizeof(char) * term_size + 1);
+	spc[term_size]='\n';
+	for(int i=0;i<term_size;i++){spc[i]='=';}
+
+
 	if(argc > 2){
 	char * file_name = argv[argc-1];
 	char * action = argv[argc-2];
