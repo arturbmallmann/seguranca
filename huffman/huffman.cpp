@@ -108,7 +108,6 @@ void compress(char * file_name){
 		texto[i]=it;
 //		}
 	}
-	cout<<"entropia: "<<calc_entropy(texto, size)<<endl;
 //	sort(mapping.begin(),mapping.end());//,[](const dic_item a, const dic_item b){
 //		return a.qnt < b.qnt;
 //	});
@@ -210,17 +209,17 @@ void compress(char * file_name){
 		dic_item item = entries[o];
 //		cout<<(char)entries[o].c;
 //		printf("%c %x(%d)[",item.c,item.cod,item.cod_bits);
-		cout<<'[';
+//		cout<<'[';
 		if (item.cod_bits != 0){
 			for (int z=32-item.cod_bits; z < 32 ;z++){
 				write_bit(&bstm,((item.cod << z) & 0x80000000) == 0x80000000);
 			//	cout<<'>'<<(7-z)<<"< ";
 //				printf(",%x z=%d",((item.cod << z)& 0x80000000) == 0x80000000,z);
-				cout<<(((item.cod << z)& 0x80000000) == 0x80000000);
+//				cout<<(((item.cod << z)& 0x80000000) == 0x80000000);
 				cabecalho.zip_size++;
 			}
 		}
-		cout<<"]\n";
+//		cout<<"]\n";
 	}
 
 	// empurra os bits que faltam
@@ -235,6 +234,7 @@ void compress(char * file_name){
 //	cout<<"size of char:"<<sizeof(char)<<endl;
 	cout<<"Bits original size: "<<size*8<<" zip size: "<<cabecalho.zip_size<<endl;
 	dic.close();
+	cout<<"entropia original: "<<calc_entropy(texto, size)<<endl;
 }
 
 
@@ -266,7 +266,7 @@ using namespace std;
 void decompress(char * file_name){
 	char sufix [5] = ".out";
 	char * outfile_name = change_suffix(file_name, sufix);
-	ofstream output_file = ofstream(outfile_name,ios::out|ios::binary);
+	fstream output_file = fstream(outfile_name,ios::binary|ios::out);
 	ifstream input_file = ifstream(file_name,ios::in|ios::binary);
 	input_file.seekg(0, ios::end);
 	int size = input_file.tellg();
@@ -298,9 +298,10 @@ void decompress(char * file_name){
 	int position = 0;
 	while (position<cabecalho.zip_size){
 		int c = seek_tree(arvore, &position, zipped, cabecalho.root_tree);
-		cout<<entradas[c].c;
+		char o = entradas[c].c;
+		cout<<o;
 //		cin>>aaa;
-//		write_file<char>((fstream*)&output_file, &(entradas[c].c));
+		write_file<char>(&output_file, &o);
 	}
 	cout<<"\n"<<spc;
 	cout<<"entropia: "<<calc_entropy(zipped, cabecalho.zip_size/8 + 1)<<endl;

@@ -1,0 +1,42 @@
+Aluno: Artur Bernardo Mallmann
+
+Modo de uso:
+compactar:
+./huffman -c arquivo_original
+descompactar:
+./huffman -d arquivo_compactado
+Entropia do arquivo original é exibida ao compactar
+Entropia do arquivo compactado é exibida ao descompactar
+
+Neste relatório iremos comparar a entropia dos seguintes arquivos:
+
+pagina.html
+huffman.zip
+cript.gpg
+manual.txt
+
+E após isto iremos comparar com a entropia deles compacatados usando
+o algoritmo de huffman.
+
+pagina.html
+original: 0.7506 
+compactado: 0.719546
+
+ml.html
+original: 0.780383
+compactada: 0.54535
+
+huffman.zip
+original: 0.997721
+compactado: 0.969227
+
+huffman.zip.gpg
+original: 0.998767
+compactado: 0.940565
+
+manual.txt
+original: 0.689723
+compactado: 0.935337
+
+Percebi que arquivos já compactados ou criptografados tendem a manter um valor de entropia aproximadamente alto. O arquivo html escolhido parece conter bastante trechos com repetições e ocorreu de criar strings de compactação bastante aproximadas oq acabou resultando em um valor de entropia um pouco menor que o original.
+A maior diferença foi no arquivo manual.txt, onde ficou visível a diferença do valor de entropia. É um arquivo de texto cru(txt) em português, vemos que isto mostra que a mensagem fica mais difícil de ser compreendida e aparenta quase não ter sentido.
